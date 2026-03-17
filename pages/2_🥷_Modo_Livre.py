@@ -9,6 +9,8 @@ from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, WebRtcMode, RT
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.vision import DetectorJutsu
 from src.utils import aplicar_estilo_ninja
+from twilio.rest import Client
+from streamlit_webrtc import RTCConfiguration
 
 if getattr(st, "experimental_rerun", None) is None:
     st.experimental_rerun = st.rerun
@@ -56,7 +58,23 @@ st.markdown("""
 col_video, col_status = st.columns([2, 1])
 
 # Usamos o servidor do Google para ajudar a conectar o vídeo pelo ngrok
-RTC_CONFIG = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
+@st.cache_resource
+def obter_servidores_ice():
+    try:
+        # Tenta pegar as chaves do cofre secreto do Streamlit
+        account_sid = st.secrets["TWILIO_ACCOUNT_SID"]
+        auth_token = st.secrets["TWILIO_AUTH_TOKEN"]
+        
+        # Pede para o Twilio um servidor TURN novo e blindado
+        cliente = Client(account_sid, auth_token)
+        token = cliente.tokens.create()
+        return token.ice_servers
+    except Exception as e:
+        # Se der erro (ex: rodando local sem o cofre), volta pro STUN do Google
+        st.warning("Aviso: Rodando sem servidor TURN. A câmera pode falhar em redes bloqueadas.")
+        return [{"urls": ["stun:stun.l.google.com:19302"]}]
+
+RTC_CONFIG = RTCConfiguration({"iceServers": obter_servidores_ice()})
 
 def carregar_modelo_visao():
     caminho_modelo = os.path.join(os.path.dirname(__file__), '..', 'models', 'best.pt')
