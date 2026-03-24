@@ -57,7 +57,6 @@ st.markdown("""
 
 col_video, col_status = st.columns([2, 1])
 
-# Usamos o servidor do Google para ajudar a conectar o vídeo pelo ngrok
 @st.cache_resource
 def obter_servidores_ice():
     try:
