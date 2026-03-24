@@ -3,6 +3,8 @@ from ultralytics import YOLO
 import sys
 import os
 
+os.environ["QT_QPA_PLATFORM"] = "offscreen"
+
 # Esse truque garante que o Python ache os arquivos dentro da pasta src sem dar erro
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.jutsu_logic import GerenciadorDeJutsus

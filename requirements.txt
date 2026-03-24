@@ -1,6 +1,6 @@
 opencv-python-headless
-streamlit
 ultralytics
+streamlit
 streamlit-webrtc
 av
 twilio
