@@ -163,7 +163,7 @@ if ctx.state.playing:
                 if "gif" in assets:
                     caminho_gif = os.path.join(os.path.dirname(__file__), '..', 'assets', 'gifs', assets['gif'])
                     if os.path.exists(caminho_gif):
-                        caixa_gif.image(caminho_gif, use_container_width=True)
+                        caixa_gif.image(caminho_gif, width="stretch")
             else:
                 caixa_gif.empty()
                 caixa_jutsu.empty()

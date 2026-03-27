@@ -196,7 +196,7 @@ if ctx.state.playing:
                     if "gif" in assets:
                         caminho_gif = os.path.join(os.path.dirname(__file__), '..', 'assets', 'gifs', assets['gif'])
                         if os.path.exists(caminho_gif):
-                            painel_gif.image(caminho_gif, use_container_width=True)
+                            painel_gif.image(caminho_gif, width="stretch")
                     
                     # Congela por 4 segundos para o cara curtir a vitória
                     time.sleep(4)
