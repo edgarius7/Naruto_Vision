@@ -4,3 +4,4 @@ opencv-python-headless
 streamlit-webrtc==0.64.6
 av
 twilio
+tornado==6.3.3
