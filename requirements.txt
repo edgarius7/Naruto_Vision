@@ -1,6 +1,6 @@
-opencv-python-headless
-ultralytics
-streamlit
-streamlit-webrtc
-av
-twilio
+opencv-python-headless==4.10.0.84
+ultralytics==8.2.2
+streamlit==1.35.0
+streamlit-webrtc==0.47.1
+av==12.1.0
+twilio==8.10.2
