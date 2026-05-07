@@ -1,6 +1,7 @@
 streamlit
 ultralytics
 opencv-python-headless
-streamlit-webrtc
-av
+streamlit-webrtc==0.47.4
+av==10.0.0
 twilio
+tornado==6.3.3
