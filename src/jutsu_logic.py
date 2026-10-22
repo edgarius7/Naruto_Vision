@@ -86,3 +86,94 @@ class GerenciadorDeJutsus:
                     return nome_jutsu
                     
         return None
+
+class FiltroSelo:
+    """
+    Estabiliza a leitura da IA: o selo confirmado só muda quando um novo valor
+    (inclusive "nenhum selo") aparece por X frames seguidos.
+    """
+    def __init__(self, frames_confirmacao=4):
+        self.frames_confirmacao = frames_confirmacao
+        self.confirmado = None
+        self.candidato = None
+        self.contagem = 0
+
+    def atualizar(self, selo_detectado):
+        selo = selo_detectado.lower() if selo_detectado else None
+
+        if selo == self.confirmado:
+            self.candidato = None
+            self.contagem = 0
+            return self.confirmado
+
+        if selo == self.candidato:
+            self.contagem += 1
+        else:
+            self.candidato = selo
+            self.contagem = 1
+
+        if self.contagem >= self.frames_confirmacao:
+            self.confirmado = selo
+            self.candidato = None
+            self.contagem = 0
+
+        return self.confirmado
+
+
+class TreinoGuiado:
+    """
+    Regras do Modo Guiado sem nenhum 'sleep': as pausas de vitória e de punição
+    são marcadas com horário de término e o loop da página só consulta o estado.
+    """
+    def __init__(self, sequencia, tempo_limite=4.0, tempo_vitoria=4.0, tempo_punicao=1.5):
+        self.sequencia = sequencia
+        self.tempo_limite = tempo_limite
+        self.tempo_vitoria = tempo_vitoria
+        self.tempo_punicao = tempo_punicao
+
+        self.indice = 0
+        self.fase = "jogando"  # "jogando", "vitoria" ou "punicao"
+        self.fim_da_fase = 0.0
+        self.tempo_ultimo_acerto = time.time()
+        # Selo que acabou de ser aceito: só vale de novo depois que o ninja desfizer a pose.
+        # É isso que impede a auto-vitória (ex: Kage Bunshin em loop com a mão parada).
+        self.selo_bloqueado = None
+
+    @property
+    def alvo(self):
+        return self.sequencia[self.indice]
+
+    def atualizar(self, selo_confirmado, agora=None):
+        """Recebe o selo estável da câmera e devolve 'acerto', 'vitoria', 'punicao' ou None."""
+        agora = time.time() if agora is None else agora
+        selo = selo_confirmado.lower() if selo_confirmado else None
+
+        if self.selo_bloqueado is not None and selo != self.selo_bloqueado:
+            self.selo_bloqueado = None
+
+        if self.fase != "jogando":
+            if agora < self.fim_da_fase:
+                return None
+            self.fase = "jogando"
+            self.tempo_ultimo_acerto = agora
+
+        # Regra da Punição: demorou demais entre um selo e outro
+        if self.indice > 0 and agora - self.tempo_ultimo_acerto > self.tempo_limite:
+            self.indice = 0
+            self.fase = "punicao"
+            self.fim_da_fase = agora + self.tempo_punicao
+            return "punicao"
+
+        if selo is None or selo != self.alvo.lower() or self.selo_bloqueado is not None:
+            return None
+
+        self.indice += 1
+        self.selo_bloqueado = selo
+        self.tempo_ultimo_acerto = agora
+
+        if self.indice >= len(self.sequencia):
+            self.indice = 0
+            self.fase = "vitoria"
+            self.fim_da_fase = agora + self.tempo_vitoria
+            return "vitoria"
+        return "acerto"

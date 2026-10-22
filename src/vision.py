@@ -2,6 +2,7 @@ import cv2
 from ultralytics import YOLO
 import sys
 import os
+import threading
 
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
@@ -10,9 +11,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.jutsu_logic import GerenciadorDeJutsus
 
 class DetectorJutsu:
-    def __init__(self, caminho_modelo='models/best.pt'):
-        print("🧠 Carregando o Cérebro YOLO...")
-        self.model = YOLO(caminho_modelo)
+    def __init__(self, caminho_modelo='models/best.pt', modelo=None, lock_modelo=None):
+        # No site o YOLO vem pronto e compartilhado entre as sessões (ver src/recursos.py);
+        # aqui cada detector só cria o próprio Juiz, para um combo não vazar para outro usuário
+        if modelo is None:
+            print("🧠 Carregando o Cérebro YOLO...")
+            modelo = YOLO(caminho_modelo)
+        self.model = modelo
+        # A mesma instância do YOLO não pode rodar em duas threads ao mesmo tempo
+        self.lock_modelo = lock_modelo or threading.Lock()
         
         print("⏱️ Chamando o Juiz do Exame Chunin...")
         # Instancia o nosso gerenciador com 2 segundos de limite entre um selo e outro
@@ -26,7 +33,8 @@ class DetectorJutsu:
         frame = cv2.flip(frame, 1)
 
         # 2. A IA faz a previsão (conf=0.6 significa 60% de certeza mínima para evitar erros)
-        resultados = self.model(frame, conf=0.6, verbose=False)
+        with self.lock_modelo:
+            resultados = self.model(frame, conf=0.6, verbose=False)
         frame_anotado = resultados[0].plot()
 
         jutsu_detectado = None
@@ -54,7 +62,8 @@ class DetectorJutsu:
                         cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
 
         # Retorna o pacote completo para quem chamou (Terminal ou Streamlit)
-        return frame_anotado, jutsu_detectado, selo_atual, self.gerenciador.sequencia_atual
+        # Devolve uma cópia do combo: a lista original continua sendo mexida pela thread do vídeo
+        return frame_anotado, jutsu_detectado, selo_atual, list(self.gerenciador.sequencia_atual)
 
 
 # =====================================================================

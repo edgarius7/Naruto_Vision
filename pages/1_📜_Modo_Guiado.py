@@ -4,15 +4,16 @@ import os
 import json
 import time
 import base64
+import threading
 import av
-from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, WebRtcMode, RTCConfiguration
+from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, WebRtcMode
 
 # Permite importar o nosso motor de visão e estilos
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.vision import DetectorJutsu
+from src.jutsu_logic import FiltroSelo, TreinoGuiado
+from src.recursos import carregar_modelo_yolo, obter_rtc_config
 from src.utils import aplicar_estilo_ninja  # Atualizado para bater com o nome da função do ui_utils
-from twilio.rest import Client
-from streamlit_webrtc import RTCConfiguration
 
 
 if getattr(st, "experimental_rerun", None) is None:
@@ -91,46 +92,33 @@ col_video, col_status = st.columns([2, 1])
 # ==========================================
 
 
-# --- JUTSU SUPREMO DE REDES (Servidor TURN) ---
-@st.cache_resource
-def obter_servidores_ice():
-    try:
-        # Tenta pegar as chaves do cofre secreto do Streamlit
-        account_sid = st.secrets["TWILIO_ACCOUNT_SID"]
-        auth_token = st.secrets["TWILIO_AUTH_TOKEN"]
-        
-        # Pede para o Twilio um servidor TURN novo e blindado
-        cliente = Client(account_sid, auth_token)
-        token = cliente.tokens.create()
-        return token.ice_servers
-    except Exception as e:
-        # Se der erro (ex: rodando local sem o cofre), volta pro STUN do Google
-        st.warning("Aviso: Rodando sem servidor TURN. A câmera pode falhar em redes bloqueadas.")
-        return [{"urls": ["stun:stun.l.google.com:19302"]}]
-
-RTC_CONFIG = RTCConfiguration({"iceServers": obter_servidores_ice()})
-
-def carregar_modelo_visao():
-    caminho_modelo = os.path.join(os.path.dirname(__file__), '..', 'models', 'best.pt')
-    return DetectorJutsu(caminho_modelo)
-ia_pronta = carregar_modelo_visao()
+RTC_CONFIG = obter_rtc_config()
+MODELO_YOLO, LOCK_MODELO = carregar_modelo_yolo()
 
 class TreinoProcessor(VideoProcessorBase):
-    def __init__(self):
-        self.detector = ia_pronta
-        self.combo_atual = []
-        self.selo_atual_lido = ""
+    def __init__(self, modelo, lock_modelo):
+        # Cada sessão tem o próprio detector (e Juiz); só o YOLO é compartilhado
+        self.detector = DetectorJutsu(modelo=modelo, lock_modelo=lock_modelo)
+        self.filtro = FiltroSelo()
+        # recv() roda na thread do WebRTC e a página lê o selo na thread do script
+        self.lock = threading.Lock()
+        self._selo_confirmado = None
 
     def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
         img = frame.to_ndarray(format="bgr24")
         
         # Ignoramos o combo do Modo Livre, queremos só o selo isolado que a IA viu agora
         frame_anotado, _, selo_visto, _ = self.detector.processar_frame(img)
-        
-        if selo_visto:
-            self.selo_atual_lido = selo_visto
+        selo_confirmado = self.filtro.atualizar(selo_visto)
+
+        with self.lock:
+            self._selo_confirmado = selo_confirmado
             
         return av.VideoFrame.from_ndarray(frame_anotado, format="bgr24")
+
+    def selo_confirmado(self):
+        with self.lock:
+            return self._selo_confirmado
 
 with col_video:
     st.markdown("### 🟢 Câmera de Treino")
@@ -138,7 +126,7 @@ with col_video:
         key="modo_guiado",
         mode=WebRtcMode.SENDRECV,
         rtc_configuration=RTC_CONFIG,
-        video_processor_factory=TreinoProcessor,
+        video_processor_factory=lambda: TreinoProcessor(MODELO_YOLO, LOCK_MODELO),
         media_stream_constraints={"video": True, "audio": False},
         async_processing=True,
     )
@@ -150,71 +138,62 @@ with col_status:
     painel_gif = st.empty()
     painel_audio = st.empty()
 
+def mostrar_vitoria():
+    painel_status.success(f"🎉 JUTSU CONCLUÍDO: {jutsu_escolhido}!")
+
+    # Dispara o GIF e o Áudio
+    assets = MAPA_ASSETS.get(jutsu_escolhido, {})
+    if "audio" in assets:
+        caminho_audio = os.path.join(os.path.dirname(__file__), '..', 'assets', 'audios', assets['audio'])
+        if os.path.exists(caminho_audio):
+            with open(caminho_audio, "rb") as f:
+                html_audio = f'<audio autoplay id="audio_{time.time()}"><source src="data:audio/mp3;base64,{base64.b64encode(f.read()).decode()}" type="audio/mp3"></audio>'
+                painel_audio.markdown(html_audio, unsafe_allow_html=True)
+
+    if "gif" in assets:
+        caminho_gif = os.path.join(os.path.dirname(__file__), '..', 'assets', 'gifs', assets['gif'])
+        if os.path.exists(caminho_gif):
+            painel_gif.image(caminho_gif, width="stretch")
+
 # ==========================================
 # LÓGICA DO TREINAMENTO (O Loop Principal)
 # ==========================================
 if ctx.state.playing:
-    indice_atual = 0
-    ultimo_selo_lido = ""
-    tempo_ultimo_acerto = time.time()
-    vitoria_recente = False
-    
+    treino = TreinoGuiado(sequencia_alvo)
+    fase_anterior = None
+    alvo_anterior = None
+
+    # Não existe mais 'sleep' longo aqui dentro: toda volta escreve na barra de progresso,
+    # e é nessa chamada que o Streamlit encerra o loop quando a câmera desliga ou a página recarrega.
     while True:
-        if ctx.video_processor:
-            # 1. Qual é o alvo e o que a IA está vendo?
-            alvo_atual = sequencia_alvo[indice_atual]
-            selo_visto_min = ctx.video_processor.selo_atual_lido.lower()
-            ultimo_selo_min = ultimo_selo_lido.lower()
-            alvo_min = alvo_atual.lower()
+        processador = ctx.video_processor
+        if processador is None:
+            painel_status.info("📷 Conectando à câmera...")
+            barra_progresso.progress(0, text="Aguardando a câmera")
+            time.sleep(0.1)
+            continue
 
-            if not vitoria_recente:
-                painel_status.info(f"👉 Faça o selo: **{alvo_atual}**")
-                progresso_porcentagem = int((indice_atual / len(sequencia_alvo)) * 100)
-                barra_progresso.progress(progresso_porcentagem, text=f"Progresso: {indice_atual}/{len(sequencia_alvo)}")
+        evento = treino.atualizar(processador.selo_confirmado())
 
-            # 2. Lógica de Acerto
-            if selo_visto_min == alvo_min and selo_visto_min != ultimo_selo_min:
-                indice_atual += 1
-                ultimo_selo_lido = ctx.video_processor.selo_atual_lido
-                tempo_ultimo_acerto = time.time()
-                
-                # Se completou o Jutsu!
-                if indice_atual >= len(sequencia_alvo):
-                    vitoria_recente = True
-                    painel_status.success(f"🎉 JUTSU CONCLUÍDO: {jutsu_escolhido}!")
-                    barra_progresso.progress(100, text="Dominado!")
-                    
-                    # Dispara o GIF e o Áudio
-                    assets = MAPA_ASSETS.get(jutsu_escolhido, {})
-                    if "audio" in assets:
-                        caminho_audio = os.path.join(os.path.dirname(__file__), '..', 'assets', 'audios', assets['audio'])
-                        if os.path.exists(caminho_audio):
-                            with open(caminho_audio, "rb") as f:
-                                html_audio = f'<audio autoplay><source src="data:audio/mp3;base64,{base64.b64encode(f.read()).decode()}" type="audio/mp3"></audio>'
-                                painel_audio.markdown(html_audio, unsafe_allow_html=True)
-                    
-                    if "gif" in assets:
-                        caminho_gif = os.path.join(os.path.dirname(__file__), '..', 'assets', 'gifs', assets['gif'])
-                        if os.path.exists(caminho_gif):
-                            painel_gif.image(caminho_gif, width="stretch")
-                    
-                    # Congela por 4 segundos para o cara curtir a vitória
-                    time.sleep(4)
-                    
-                    # Reseta o jogo
-                    indice_atual = 0
-                    ultimo_selo_lido = ""
-                    painel_gif.empty()
-                    painel_audio.empty()
-                    vitoria_recente = False
+        if evento == "vitoria":
+            mostrar_vitoria()
+        elif evento == "punicao":
+            painel_status.error("⏳ Você demorou muito! A sequência foi resetada.")
 
-            # 3. Regra da Punição (Se demorar mais de 4 segundos)
-            elif indice_atual > 0 and (time.time() - tempo_ultimo_acerto) > 4.0 and not vitoria_recente:
-                indice_atual = 0
-                ultimo_selo_lido = ""
-                painel_status.error("⏳ Você demorou muito! A sequência foi resetada.")
-                time.sleep(1.5)
-                tempo_ultimo_acerto = time.time() # Reinicia o relógio
-                ctx.video_processor.selo_atual_lido = "" # Limpa a memória da câmera
-                
+        if treino.fase == "jogando":
+            # Saindo da comemoração: limpa o GIF e o áudio
+            if fase_anterior == "vitoria":
+                painel_gif.empty()
+                painel_audio.empty()
+            if treino.fase != fase_anterior or treino.alvo != alvo_anterior:
+                painel_status.info(f"👉 Faça o selo: **{treino.alvo}**")
+                alvo_anterior = treino.alvo
+
+        if treino.fase == "vitoria":
+            barra_progresso.progress(100, text="Dominado!")
+        else:
+            progresso_porcentagem = int((treino.indice / len(sequencia_alvo)) * 100)
+            barra_progresso.progress(progresso_porcentagem, text=f"Progresso: {treino.indice}/{len(sequencia_alvo)}")
+
+        fase_anterior = treino.fase
         time.sleep(0.1)

@@ -3,14 +3,14 @@ import sys
 import os
 import time
 import base64
+import threading
 import av
-from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, WebRtcMode, RTCConfiguration
+from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, WebRtcMode
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.vision import DetectorJutsu
+from src.recursos import carregar_modelo_yolo, obter_rtc_config
 from src.utils import aplicar_estilo_ninja
-from twilio.rest import Client
-from streamlit_webrtc import RTCConfiguration
 
 if getattr(st, "experimental_rerun", None) is None:
     st.experimental_rerun = st.rerun
@@ -57,34 +57,17 @@ st.markdown("""
 
 col_video, col_status = st.columns([2, 1])
 
-@st.cache_resource
-def obter_servidores_ice():
-    try:
-        # Tenta pegar as chaves do cofre secreto do Streamlit
-        account_sid = st.secrets["TWILIO_ACCOUNT_SID"]
-        auth_token = st.secrets["TWILIO_AUTH_TOKEN"]
-        
-        # Pede para o Twilio um servidor TURN novo e blindado
-        cliente = Client(account_sid, auth_token)
-        token = cliente.tokens.create()
-        return token.ice_servers
-    except Exception as e:
-        # Se der erro (ex: rodando local sem o cofre), volta pro STUN do Google
-        st.warning("Aviso: Rodando sem servidor TURN. A câmera pode falhar em redes bloqueadas.")
-        return [{"urls": ["stun:stun.l.google.com:19302"]}]
-
-RTC_CONFIG = RTCConfiguration({"iceServers": obter_servidores_ice()})
-
-def carregar_modelo_visao():
-    caminho_modelo = os.path.join(os.path.dirname(__file__), '..', 'models', 'best.pt')
-    return DetectorJutsu(caminho_modelo)
-ia_pronta = carregar_modelo_visao()
+RTC_CONFIG = obter_rtc_config()
+MODELO_YOLO, LOCK_MODELO = carregar_modelo_yolo()
 
 class JutsuProcessor(VideoProcessorBase):
-    def __init__(self):
-        self.detector = ia_pronta
-        self.combo_atual = []
-        self.jutsu_detectado = ""
+    def __init__(self, modelo, lock_modelo):
+        # Cada sessão tem o próprio detector (e Juiz); só o YOLO é compartilhado
+        self.detector = DetectorJutsu(modelo=modelo, lock_modelo=lock_modelo)
+        # recv() roda na thread do WebRTC e a página lê o estado na thread do script
+        self.lock = threading.Lock()
+        self._combo = []
+        self._jutsu_pendente = None
 
     # Essa função roda a cada frame que chega do celular do seu amigo
     def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
@@ -94,11 +77,19 @@ class JutsuProcessor(VideoProcessorBase):
         frame_anotado, jutsu, _, combo = self.detector.processar_frame(img)
         
         # Salva o status atual para a tela ler depois
-        self.combo_atual = combo
-        if jutsu:
-            self.jutsu_detectado = jutsu
+        with self.lock:
+            self._combo = combo
+            if jutsu:
+                self._jutsu_pendente = jutsu
             
         return av.VideoFrame.from_ndarray(frame_anotado, format="bgr24")
+
+    def ler_estado(self):
+        """Devolve o combo e o jutsu invocado, consumindo o jutsu para o som não tocar em loop."""
+        with self.lock:
+            jutsu = self._jutsu_pendente
+            self._jutsu_pendente = None
+            return list(self._combo), jutsu
 
 with col_video:
     # Este é o novo "Ligar Câmera". Ele abre o player no navegador do cliente!
@@ -106,7 +97,7 @@ with col_video:
         key="modo_livre",
         mode=WebRtcMode.SENDRECV,
         rtc_configuration=RTC_CONFIG,
-        video_processor_factory=JutsuProcessor,
+        video_processor_factory=lambda: JutsuProcessor(MODELO_YOLO, LOCK_MODELO),
         media_stream_constraints={"video": True, "audio": False},
         async_processing=True,
     )
@@ -118,56 +109,57 @@ with col_status:
     caixa_gif = st.empty()
     caixa_audio = st.empty()
 
+def mostrar_jutsu(jutsu_lido):
+    caixa_jutsu.success(f"### 🔥 {jutsu_lido} INVOCADO! 🔥")
+
+    assets = MAPA_ASSETS.get(jutsu_lido, {})
+    # Toca o Áudio
+    if "audio" in assets:
+        caminho_audio = os.path.join(os.path.dirname(__file__), '..', 'assets', 'audios', assets['audio'])
+        if os.path.exists(caminho_audio):
+            with open(caminho_audio, "rb") as f:
+                b64_audio = base64.b64encode(f.read()).decode()
+                html_audio = f'<audio autoplay id="audio_{time.time()}"><source src="data:audio/mp3;base64,{b64_audio}" type="audio/mp3"></audio>'
+                caixa_audio.empty()
+                caixa_audio.markdown(html_audio, unsafe_allow_html=True)
+
+    # O GIF é enviado uma vez só e fica no placeholder até a animação acabar
+    if "gif" in assets:
+        caminho_gif = os.path.join(os.path.dirname(__file__), '..', 'assets', 'gifs', assets['gif'])
+        if os.path.exists(caminho_gif):
+            caixa_gif.image(caminho_gif, width="stretch")
+
 # ==========================================
 # LÓGICA DE TELA (Enquanto a câmera estiver ligada)
 # ==========================================
 if ctx.state.playing:
-    tempo_animacao = 0
-    jutsu_em_exibicao = ""
+    fim_animacao = None
 
-    # Loop infinito que fica "vigiando" o processador de vídeo para atualizar os textos
+    # Toda volta escreve na caixa de combo, e é nessa chamada que o Streamlit
+    # encerra o loop quando a câmera desliga ou a página recarrega.
     while True:
-        if ctx.video_processor:
-            # 1. Checa o Combo
-            combo = ctx.video_processor.combo_atual
+        processador = ctx.video_processor
+        if processador is None:
+            caixa_combo.write("📷 Conectando à câmera...")
+        else:
+            # 1. Checa o Combo e se algum Jutsu foi invocado no processador
+            combo, jutsu_lido = processador.ler_estado()
             if combo:
                 combo_formatado = [s.capitalize() for s in combo]
                 caixa_combo.info(f"**Combo:** {' ➡️ '.join(combo_formatado)}")
             else:
                 caixa_combo.write("Aguardando selos...")
 
-            # 2. Checa se algum Jutsu foi invocado no processador
-            jutsu_lido = ctx.video_processor.jutsu_detectado
             if jutsu_lido:
-                jutsu_em_exibicao = jutsu_lido
-                tempo_animacao = time.time()
-                caixa_jutsu.success(f"### 🔥 {jutsu_lido} INVOCADO! 🔥")
-                
-                # Toca o Áudio
-                assets = MAPA_ASSETS.get(jutsu_lido, {})
-                if "audio" in assets:
-                    caminho_audio = os.path.join(os.path.dirname(__file__), '..', 'assets', 'audios', assets['audio'])
-                    if os.path.exists(caminho_audio):
-                        with open(caminho_audio, "rb") as f:
-                            b64_audio = base64.b64encode(f.read()).decode()
-                            html_audio = f'<audio autoplay id="audio_{time.time()}"><source src="data:audio/mp3;base64,{b64_audio}" type="audio/mp3"></audio>'
-                            caixa_audio.empty()
-                            caixa_audio.markdown(html_audio, unsafe_allow_html=True)
-                
-                # "Limpa" o jutsu da memória do processador para ele não tocar o som em loop eterno
-                ctx.video_processor.jutsu_detectado = ""
+                mostrar_jutsu(jutsu_lido)
+                fim_animacao = time.time() + 4.0
 
-            # 3. Mantém o GIF na tela por 4 segundos
-            if time.time() - tempo_animacao < 4.0 and jutsu_em_exibicao != "":
-                assets = MAPA_ASSETS.get(jutsu_em_exibicao, {})
-                if "gif" in assets:
-                    caminho_gif = os.path.join(os.path.dirname(__file__), '..', 'assets', 'gifs', assets['gif'])
-                    if os.path.exists(caminho_gif):
-                        caixa_gif.image(caminho_gif, width="stretch")
-            else:
-                caixa_gif.empty()
-                caixa_jutsu.empty()
-                caixa_audio.empty()
+        # 2. Mantém o GIF na tela por 4 segundos
+        if fim_animacao is not None and time.time() >= fim_animacao:
+            caixa_gif.empty()
+            caixa_jutsu.empty()
+            caixa_audio.empty()
+            fim_animacao = None
 
         # Dá uma mini pausa pro seu computador não explodir processando a tela
         time.sleep(0.1)
