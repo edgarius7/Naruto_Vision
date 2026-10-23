@@ -1,5 +1,5 @@
 // Núcleo do app: rotas, câmera, laço de desenho e avisos. As regras de cada modo ficam em modos.js.
-import { Detector, MotorVisao, abrirCamera } from './visao.js';
+import { MotorVisao, abrirCamera } from './visao.js';
 import { FiltroSelo } from './jogo.js';
 import { Efeitos } from './efeitos.js';
 import { som, destravarSom, configurarSom, falarJutsu } from './som.js';
@@ -20,8 +20,7 @@ const CORES_ELEMENTO = {
 // Teclas para simular selos sem câmera (acessibilidade e testes): letras parecidas com o nome
 const TECLAS = { x: 'clone', t: 'tigre', o: 'cobra', n: 'carneiro', b: 'boi', h: 'cachorro', j: 'javali', m: 'macaco', c: 'coelho', v: 'cavalo', p: 'passaro', d: 'dragao' };
 
-const detector = new Detector();
-const motor = new MotorVisao(detector);
+const motor = new MotorVisao();
 const efeitos = new Efeitos();
 const filtro = new FiltroSelo({ msSegurar: estado.config.msSegurar });
 const canvas = $('#tela');
@@ -99,10 +98,10 @@ function registrar(opcoes) {
 // ---------------------------------------------------------------- câmera e modelo
 
 function carregarModelo() {
-  carregandoModelo ??= detector.carregar((p) => { $('#modelo-barra').style.width = `${Math.round(p * 100)}%`; })
+  carregandoModelo ??= motor.carregar((p) => { $('#modelo-barra').style.width = `${Math.round(p * 100)}%`; })
     .then(() => {
       $('#modelo-barra').style.width = '100%';
-      $('#modelo-status span').textContent = `Inteligência artificial pronta (${detector.backend === 'webgpu' ? 'placa de vídeo' : 'processador'}).`;
+      $('#modelo-status span').textContent = `Inteligência artificial pronta (${motor.backend === 'webgpu' ? 'placa de vídeo' : 'processador'}).`;
     })
     .catch((erro) => {
       $('#modelo-status span').textContent = `Não consegui carregar o modelo: ${erro.message}`;
@@ -254,7 +253,7 @@ function quadro(t) {
   desenharAnel(det);
   atualizarVendo(det);
 
-  $('#desempenho').textContent = video ? `${motor.fps.toFixed(0)} fps · ${detector.backend}` : 'sem câmera';
+  $('#desempenho').textContent = video ? `IA ${motor.fps.toFixed(0)} fps · ${motor.backend ?? '…'}` : 'sem câmera';
 }
 
 function entrarNoJogo(nomeModo) {

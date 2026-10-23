@@ -1,114 +1,11 @@
-// Detecção dos selos no navegador: o mesmo best.pt do app Streamlit, exportado para ONNX (320px).
-/* global ort */
-import { CLASSES_MODELO } from './selos.js';
+// Câmera e laço de detecção. O modelo roda num Web Worker (worker-visao.js) para não travar a página;
+// sem suporte a worker com OffscreenCanvas, cai para a thread principal.
+import { Detector } from './detector.js';
 
-const VERSAO_ORT = '1.20.1';
-const CAMINHO_MODELO = 'models/best_320.onnx';
-const TAMANHO = 320;
-export const CONF_MINIMA = 0.6; // mesmo limiar do src/vision.py
-const CONF_EXIBICAO = 0.3;      // abaixo do limiar ainda mostramos "parece..." para orientar o jogador
-
-ort.env.wasm.wasmPaths = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${VERSAO_ORT}/dist/`;
-
-async function baixarComProgresso(url, aoProgredir) {
-  const resposta = await fetch(url);
-  if (!resposta.ok) throw new Error(`Não consegui baixar o modelo (${resposta.status})`);
-  const total = Number(resposta.headers.get('content-length')) || 0;
-  const leitor = resposta.body.getReader();
-  const partes = [];
-  let recebido = 0;
-  for (;;) {
-    const { done, value } = await leitor.read();
-    if (done) break;
-    partes.push(value);
-    recebido += value.length;
-    if (total) aoProgredir(recebido / total);
-  }
-  const bytes = new Uint8Array(recebido);
-  let pos = 0;
-  for (const p of partes) { bytes.set(p, pos); pos += p.length; }
-  return bytes;
-}
-
-export class Detector {
-  constructor() {
-    this.sessao = null;
-    this.backend = null;
-    this.entrada = document.createElement('canvas');
-    this.entrada.width = TAMANHO;
-    this.entrada.height = TAMANHO;
-    this.ctxEntrada = this.entrada.getContext('2d', { willReadFrequently: true });
-    this.dados = new Float32Array(3 * TAMANHO * TAMANHO);
-  }
-
-  async carregar(aoProgredir = () => {}) {
-    if (this.sessao) return;
-    const bytes = await baixarComProgresso(CAMINHO_MODELO, aoProgredir);
-    // WebGPU é cerca de 4x mais rápido; WASM fica de reserva para navegadores sem GPU
-    const backends = navigator.gpu ? ['webgpu', 'wasm'] : ['wasm'];
-    let ultimoErro;
-    for (const backend of backends) {
-      try {
-        this.sessao = await ort.InferenceSession.create(bytes, { executionProviders: [backend] });
-        this.backend = backend;
-        return;
-      } catch (erro) {
-        ultimoErro = erro;
-      }
-    }
-    throw ultimoErro;
-  }
-
-  // Letterbox igual ao Ultralytics (cinza 114), RGB normalizado 0-1, formato CHW
-  preparar(fonte, largura, altura) {
-    const escala = Math.min(TAMANHO / largura, TAMANHO / altura);
-    const nl = Math.round(largura * escala);
-    const na = Math.round(altura * escala);
-    const dx = (TAMANHO - nl) / 2;
-    const dy = (TAMANHO - na) / 2;
-    const c = this.ctxEntrada;
-    c.fillStyle = 'rgb(114,114,114)';
-    c.fillRect(0, 0, TAMANHO, TAMANHO);
-    c.drawImage(fonte, 0, 0, largura, altura, dx, dy, nl, na);
-
-    const pixels = c.getImageData(0, 0, TAMANHO, TAMANHO).data;
-    const area = TAMANHO * TAMANHO;
-    const d = this.dados;
-    for (let i = 0; i < area; i++) {
-      d[i] = pixels[i * 4] / 255;
-      d[area + i] = pixels[i * 4 + 1] / 255;
-      d[2 * area + i] = pixels[i * 4 + 2] / 255;
-    }
-    return { tensor: new ort.Tensor('float32', d, [1, 3, TAMANHO, TAMANHO]), escala, dx, dy };
-  }
-
-  // Saída [1, 16, N]: caixa (cx, cy, w, h) + 12 classes. Como no app Python, só a detecção mais confiante importa.
-  async detectar(fonte, largura, altura) {
-    const prep = this.preparar(fonte, largura, altura);
-    const { output0: saida } = await this.sessao.run({ images: prep.tensor });
-    const [, canais, n] = saida.dims;
-    const v = saida.data;
-    let melhor = -1;
-    let melhorConf = CONF_EXIBICAO;
-    let melhorClasse = -1;
-    for (let c = 4; c < canais; c++) {
-      const base = c * n;
-      for (let i = 0; i < n; i++) {
-        if (v[base + i] > melhorConf) { melhorConf = v[base + i]; melhor = i; melhorClasse = c - 4; }
-      }
-    }
-    if (melhor < 0) return null;
-    const { escala, dx, dy } = prep;
-    const w = v[2 * n + melhor] / escala;
-    const h = v[3 * n + melhor] / escala;
-    return {
-      selo: CLASSES_MODELO[melhorClasse],
-      conf: melhorConf,
-      valido: melhorConf >= CONF_MINIMA,
-      caixa: { x: (v[melhor] - dx) / escala - w / 2, y: (v[n + melhor] - dy) / escala - h / 2, w, h },
-    };
-  }
-}
+const PASTA_MODELOS = new URL('../models', import.meta.url).href;
+const CDN_ORT = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/';
+// ?ia=processador no endereço simula um aparelho sem placa de vídeo
+const FORCAR_PROCESSADOR = new URLSearchParams(location.search).get('ia') === 'processador';
 
 export class ErroCamera extends Error {
   constructor(tipo, mensagem) { super(mensagem); this.tipo = tipo; }
@@ -134,58 +31,90 @@ export async function abrirCamera() {
   }
 }
 
-// Roda a detecção em paralelo com o desenho: a tela anima a 60 fps mesmo com o modelo a ~15 fps
 export class MotorVisao {
-  constructor(detector) {
-    this.detector = detector;
+  constructor() {
     this.video = null;
-    this.quadro = document.createElement('canvas');
-    this.ctxQuadro = this.quadro.getContext('2d', { willReadFrequently: true });
+    this.backend = null;
     this.deteccao = null;
     this.fps = 0;
     this.msInferencia = 0;
     this.ativo = false;
-    this.aoDetectar = () => {};
+    this.ocupado = false;
+    this.quadros = 0;
+    this.janela = performance.now();
+    this.carregando = null;
+    this.usarWorker = typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined' && 'createImageBitmap' in window;
   }
 
-  usarVideo(video) {
-    this.video = video;
-    this.quadro.width = video.videoWidth;
-    this.quadro.height = video.videoHeight;
+  carregar(aoProgredir = () => {}) {
+    this.carregando ??= this.usarWorker ? this.carregarWorker(aoProgredir) : this.carregarLocal(aoProgredir);
+    this.carregando.catch(() => { this.carregando = null; });
+    return this.carregando;
   }
 
-  // Quadro espelhado, como no cv2.flip(frame, 1) do Python: é o que o jogador vê e o que o modelo recebe
-  capturar() {
-    const c = this.ctxQuadro;
-    c.save();
-    c.scale(-1, 1);
-    c.drawImage(this.video, -this.quadro.width, 0, this.quadro.width, this.quadro.height);
-    c.restore();
+  carregarWorker(aoProgredir) {
+    return new Promise((resolver, rejeitar) => {
+      this.worker = new Worker(new URL('./worker-visao.js', import.meta.url), { type: 'module' });
+      this.worker.onmessage = ({ data }) => {
+        if (data.tipo === 'progresso') aoProgredir(data.p);
+        else if (data.tipo === 'pronto') { this.backend = data.backend; resolver(); }
+        else if (data.tipo === 'erro') rejeitar(new Error(data.mensagem));
+        else if (data.tipo === 'deteccao') this.receber(data.deteccao, data.ms);
+      };
+      this.worker.onerror = (e) => rejeitar(new Error(e.message || 'Falha ao iniciar o detector'));
+      this.worker.postMessage({ tipo: 'carregar', pastaModelos: PASTA_MODELOS, forcarProcessador: FORCAR_PROCESSADOR });
+    });
   }
 
-  async iniciar() {
+  async carregarLocal(aoProgredir) {
+    const ort = await import(`${CDN_ORT}ort.webgpu.min.mjs`);
+    ort.env.wasm.wasmPaths = CDN_ORT;
+    this.detector = new Detector(ort, (w, h) => Object.assign(document.createElement('canvas'), { width: w, height: h }));
+    await this.detector.carregar(PASTA_MODELOS, aoProgredir, { forcarProcessador: FORCAR_PROCESSADOR });
+    this.backend = this.detector.backend;
+  }
+
+  usarVideo(video) { this.video = video; }
+
+  iniciar() {
     if (this.ativo || !this.video) return;
     this.ativo = true;
-    let quadros = 0;
-    let janela = performance.now();
-    while (this.ativo) {
-      this.capturar();
+    this.pedirQuadro();
+  }
+
+  // Um quadro por vez: o próximo só é enviado quando o anterior volta, então nada se acumula em celular lento
+  async pedirQuadro() {
+    if (!this.ativo || this.ocupado || !this.video) return;
+    if (this.video.readyState < 2) { setTimeout(() => this.pedirQuadro(), 50); return; }
+    this.ocupado = true;
+    if (this.usarWorker) {
+      const bitmap = await createImageBitmap(this.video);
+      this.worker.postMessage({ tipo: 'quadro', bitmap }, [bitmap]);
+    } else {
       const t0 = performance.now();
-      this.deteccao = await this.detector.detectar(this.quadro, this.quadro.width, this.quadro.height);
-      const agora = performance.now();
-      this.msInferencia = this.msInferencia * 0.9 + (agora - t0) * 0.1;
-      this.aoDetectar(this.deteccao, agora);
-      quadros++;
-      if (agora - janela >= 1000) {
-        this.fps = (quadros * 1000) / (agora - janela);
-        quadros = 0;
-        janela = agora;
-      }
-      await new Promise((r) => setTimeout(r, 0));
+      const v = this.video;
+      const deteccao = await this.detector.detectar(v, v.videoWidth, v.videoHeight, { espelhar: true });
+      this.receber(deteccao, performance.now() - t0);
     }
   }
 
-  parar() { this.ativo = false; }
+  receber(deteccao, ms) {
+    this.ocupado = false;
+    if (!this.ativo) return;
+    this.deteccao = deteccao;
+    this.msInferencia = this.msInferencia * 0.9 + ms * 0.1;
+    this.quadros++;
+    const agora = performance.now();
+    if (agora - this.janela >= 1000) {
+      this.fps = (this.quadros * 1000) / (agora - this.janela);
+      this.quadros = 0;
+      this.janela = agora;
+    }
+    // na thread principal, cede a vez para a página desenhar antes do próximo quadro
+    setTimeout(() => this.pedirQuadro(), this.usarWorker ? 0 : 16);
+  }
+
+  parar() { this.ativo = false; this.deteccao = null; }
 
   desligarCamera() {
     this.parar();
