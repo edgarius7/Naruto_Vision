@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Naruto Vision</title>
+  <meta name="description" content="Faça os selos de mão na frente da webcam e solte jutsus. A inteligência artificial roda no seu navegador: o vídeo não sai do seu computador.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="#/inicio" aria-label="Naruto Vision, início"><span class="marca-kanji" aria-hidden="true">印</span> Naruto Vision</a>
+    <nav class="menu" aria-label="Modos">
+      <a href="#/dojo">Dojo</a>
+      <a href="#/treino">Treino</a>
+      <a href="#/combate">Combate</a>
+      <a href="#/desafio">Desafio</a>
+      <a href="#/perfil" class="menu-perfil"><span id="topo-rank">Estudante</span><span class="mini-xp"><span id="topo-xp-barra"></span></span></a>
+    </nav>
+  </header>
+
+  <main id="conteudo">
+    <!-- ============ INÍCIO ============ -->
+    <section class="tela" data-tela="inicio">
+      <div class="heroi">
+        <p class="heroi-sobre">Academia ninja com inteligência artificial</p>
+        <h1>Faça os selos.<br><span>Solte o jutsu.</span></h1>
+        <p class="heroi-texto">A sua webcam reconhece os 12 selos de mão em tempo real. Aprenda cada selo no Dojo, treine as sequências e prove que você chega a Kage.</p>
+        <div class="heroi-acoes">
+          <a class="botao botao-principal" href="#/dojo">Começar pelo Dojo</a>
+          <a class="botao" href="#/combate">Já sei os selos</a>
+        </div>
+        <p class="heroi-privacidade">🔒 A IA roda no seu navegador. O vídeo nunca sai do seu computador.</p>
+      </div>
+
+      <div class="modos">
+        <a class="modo" href="#/dojo" style="--cor: var(--verde)">
+          <span class="modo-kanji" aria-hidden="true">道</span>
+          <h2>Dojo</h2>
+          <p>Aprenda os 12 selos, um por vez, com foto de referência e dica de posição.</p>
+        </a>
+        <a class="modo" href="#/treino" style="--cor: var(--azul)">
+          <span class="modo-kanji" aria-hidden="true">修</span>
+          <h2>Treino</h2>
+          <p>Escolha um jutsu e siga a receita de selos antes que o chakra se dissipe.</p>
+        </a>
+        <a class="modo" href="#/combate" style="--cor: var(--laranja)">
+          <span class="modo-kanji" aria-hidden="true">戦</span>
+          <h2>Combate</h2>
+          <p>Sem cola. Faça qualquer sequência de cabeça e veja o jutsu acontecer.</p>
+        </a>
+        <a class="modo" href="#/desafio" style="--cor: var(--vermelho)">
+          <span class="modo-kanji" aria-hidden="true">速</span>
+          <h2>Desafio</h2>
+          <p>Cinco jutsus sorteados contra o relógio. Bata o seu recorde.</p>
+        </a>
+      </div>
+
+      <div class="como">
+        <h2>Como funciona</h2>
+        <ol>
+          <li><b>Libere a câmera.</b> O modelo (12 MB) é baixado uma vez e roda direto no navegador.</li>
+          <li><b>Segure cada selo</b> até o anel de chakra fechar em volta das suas mãos.</li>
+          <li><b>Encadeie os selos</b> sem demorar e o jutsu dispara na tela.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ CÂMERA ============ -->
+    <section class="tela" data-tela="camera">
+      <div class="cartao camera-cartao">
+        <h1>Vamos ligar a câmera</h1>
+        <p>Para reconhecer os selos, o Naruto Vision precisa ver as suas mãos. Tudo é processado aqui no navegador: <b>nenhuma imagem é enviada para servidor nenhum</b>.</p>
+        <ul class="dicas">
+          <li>💡 Fique num lugar bem iluminado, com a luz na sua frente.</li>
+          <li>🙌 Faça os selos na altura do peito, com as mãos inteiras na imagem.</li>
+          <li>📏 Fique a mais ou menos um braço de distância da câmera.</li>
+        </ul>
+        <div class="carregamento" id="modelo-status">
+          <span>Preparando a inteligência artificial…</span>
+          <div class="barra"><div id="modelo-barra"></div></div>
+        </div>
+        <div class="erro-camera" id="erro-camera" hidden></div>
+        <div class="acoes">
+          <button class="botao botao-principal" id="btn-ativar">Ativar câmera</button>
+          <button class="botao" id="btn-teclado">Jogar sem câmera (teclado)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ JOGO (Dojo, Treino, Combate, Desafio) ============ -->
+    <section class="tela" data-tela="jogo">
+      <div class="jogo">
+        <div class="palco" id="palco">
+          <canvas id="tela" width="640" height="480" aria-label="Imagem da câmera com os efeitos"></canvas>
+          <div class="guia" aria-hidden="true"></div>
+          <div class="vendo" id="vendo" aria-live="polite"></div>
+          <div class="faixa" id="faixa" aria-live="assertive"></div>
+          <div class="desempenho" id="desempenho"></div>
+          <div class="teclado-legenda" id="teclado-legenda" hidden></div>
+        </div>
+        <aside class="painel" id="painel"></aside>
+      </div>
+    </section>
+
+    <!-- ============ PERFIL ============ -->
+    <section class="tela" data-tela="perfil">
+      <div class="perfil" id="perfil"></div>
+    </section>
+  </main>
+
+  <div class="avisos" id="avisos" aria-live="polite"></div>
+
+  <footer class="rodape">
+    Projeto de fã sem fins lucrativos, sem afiliação com Masashi Kishimoto, Shueisha, TV Tokyo ou Studio Pierrot.
+    Feito com ONNX Runtime Web e YOLOv8. <a href="teste.html">Página de teste do modelo</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.webgpu.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+[
+  {"id": "kage_bunshin", "nome": "Kage Bunshin no Jutsu", "traducao": "Clones das Sombras", "selos": ["clone"], "elemento": "clone", "origem": "canone", "nota": "Usa o selo em cruz, que não é um dos 12 selos do zodíaco."},
+  {"id": "henge", "nome": "Henge no Jutsu", "traducao": "Transformação", "selos": ["cachorro", "javali", "carneiro"], "elemento": "transformacao", "origem": "fas"},
+  {"id": "chidori", "nome": "Chidori", "traducao": "Mil Pássaros", "selos": ["boi", "coelho", "macaco"], "elemento": "raio", "origem": "fas"},
+  {"id": "suiton_barreira", "nome": "Suiton: Barreira de Água", "traducao": "Parede d'água", "selos": ["tigre", "cobra", "tigre"], "elemento": "agua", "origem": "adaptado"},
+  {"id": "harem", "nome": "Harem no Jutsu", "traducao": "Jutsu Sexy em grupo", "selos": ["carneiro", "cobra", "tigre", "carneiro"], "elemento": "transformacao", "origem": "fas"},
+  {"id": "edo_tensei", "nome": "Edo Tensei", "traducao": "Reencarnação do Mundo Impuro", "selos": ["tigre", "cobra", "cachorro", "dragao"], "elemento": "invocacao", "origem": "fas", "nota": "Sequência de ativação com fonte fraca; a de liberação começa com o Rato."},
+  {"id": "doryuuheki", "nome": "Doton: Doryuuheki", "traducao": "Muralha de Terra", "selos": ["tigre", "coelho", "javali", "cachorro"], "elemento": "terra", "origem": "fas"},
+  {"id": "ryuuka", "nome": "Katon: Ryuuka no Jutsu", "traducao": "Fogo do Dragão", "selos": ["cobra", "dragao", "coelho", "tigre"], "elemento": "fogo", "origem": "fas"},
+  {"id": "daitoppa", "nome": "Fuuton: Daitoppa", "traducao": "Grande Rajada", "selos": ["cavalo", "passaro", "boi", "cachorro"], "elemento": "vento", "origem": "adaptado"},
+  {"id": "kawarimi", "nome": "Kawarimi no Jutsu", "traducao": "Substituição", "selos": ["carneiro", "javali", "boi", "cachorro", "cobra"], "elemento": "fumaca", "origem": "fas"},
+  {"id": "kuchiyose", "nome": "Kuchiyose no Jutsu", "traducao": "Invocação", "selos": ["javali", "cachorro", "passaro", "macaco", "carneiro"], "elemento": "invocacao", "origem": "canone"},
+  {"id": "goukakyuu", "nome": "Katon: Goukakyuu no Jutsu", "traducao": "Grande Bola de Fogo", "selos": ["cobra", "carneiro", "macaco", "javali", "cavalo", "tigre"], "elemento": "fogo", "origem": "canone"},
+  {"id": "suiryuudan", "nome": "Suiton: Suiryuudan (versão curta)", "traducao": "Projétil Dragão d'Água", "selos": ["boi", "macaco", "coelho", "javali", "passaro", "boi", "cavalo", "passaro"], "elemento": "agua", "origem": "adaptado", "nota": "Trecho inicial da sequência de 44 selos que circula entre fãs, sem o selo do Rato."}
+]

@@ -1,0 +1,362 @@
+[
+ {
+  "arquivo": "../data/images/boi/boi_1773322182857.jpg",
+  "esperado": "boi",
+  "python_640": "Boi",
+  "python_320": "Boi"
+ },
+ {
+  "arquivo": "../data/images/boi/boi_1773322179575.jpg",
+  "esperado": "boi",
+  "python_640": "Boi",
+  "python_320": "Boi"
+ },
+ {
+  "arquivo": "../data/images/boi/boi_1773322182199.jpg",
+  "esperado": "boi",
+  "python_640": "Boi",
+  "python_320": "Boi"
+ },
+ {
+  "arquivo": "../data/images/boi/boi_1773322183076.jpg",
+  "esperado": "boi",
+  "python_640": "Boi",
+  "python_320": "Boi"
+ },
+ {
+  "arquivo": "../data/images/boi/boi_1773322179793.jpg",
+  "esperado": "boi",
+  "python_640": "Boi",
+  "python_320": "Boi"
+ },
+ {
+  "arquivo": "../data/images/cachorro/cachorro_1773322103737.jpg",
+  "esperado": "cachorro",
+  "python_640": "Cachorro",
+  "python_320": "Cachorro"
+ },
+ {
+  "arquivo": "../data/images/cachorro/cachorro_1773322105261.jpg",
+  "esperado": "cachorro",
+  "python_640": "Cachorro",
+  "python_320": "Cachorro"
+ },
+ {
+  "arquivo": "../data/images/cachorro/cachorro_1773322107011.jpg",
+  "esperado": "cachorro",
+  "python_640": "Cachorro",
+  "python_320": "Cachorro"
+ },
+ {
+  "arquivo": "../data/images/cachorro/cachorro_1773322106904.jpg",
+  "esperado": "cachorro",
+  "python_640": "Cachorro",
+  "python_320": "Cachorro"
+ },
+ {
+  "arquivo": "../data/images/cachorro/cachorro_1773322106250.jpg",
+  "esperado": "cachorro",
+  "python_640": "Cachorro",
+  "python_320": "Cachorro"
+ },
+ {
+  "arquivo": "../data/images/carneiro/carneiro_1773322134445.jpg",
+  "esperado": "carneiro",
+  "python_640": "Carneiro",
+  "python_320": "Carneiro"
+ },
+ {
+  "arquivo": "../data/images/carneiro/carneiro_1773322133568.jpg",
+  "esperado": "carneiro",
+  "python_640": "Carneiro",
+  "python_320": "Carneiro"
+ },
+ {
+  "arquivo": "../data/images/carneiro/carneiro_1773322133897.jpg",
+  "esperado": "carneiro",
+  "python_640": "Carneiro",
+  "python_320": "Carneiro"
+ },
+ {
+  "arquivo": "../data/images/carneiro/carneiro_1773322130171.jpg",
+  "esperado": "carneiro",
+  "python_640": "Carneiro",
+  "python_320": "Carneiro"
+ },
+ {
+  "arquivo": "../data/images/carneiro/carneiro_1773322131371.jpg",
+  "esperado": "carneiro",
+  "python_640": "Carneiro",
+  "python_320": "Carneiro"
+ },
+ {
+  "arquivo": "../data/images/cavalo/cavalo_1773322058132.jpg",
+  "esperado": "cavalo",
+  "python_640": "Cavalo",
+  "python_320": "Cavalo"
+ },
+ {
+  "arquivo": "../data/images/cavalo/cavalo_1773322059774.jpg",
+  "esperado": "cavalo",
+  "python_640": "Cavalo",
+  "python_320": "Cavalo"
+ },
+ {
+  "arquivo": "../data/images/cavalo/cavalo_1773322061961.jpg",
+  "esperado": "cavalo",
+  "python_640": "Cavalo",
+  "python_320": "Cavalo"
+ },
+ {
+  "arquivo": "../data/images/cavalo/cavalo_1773322062072.jpg",
+  "esperado": "cavalo",
+  "python_640": "Cavalo",
+  "python_320": "Cavalo"
+ },
+ {
+  "arquivo": "../data/images/cavalo/cavalo_1773322057149.jpg",
+  "esperado": "cavalo",
+  "python_640": "Cavalo",
+  "python_320": "Cavalo"
+ },
+ {
+  "arquivo": "../data/images/clone/clone_1773322240930.jpg",
+  "esperado": "clone",
+  "python_640": "Clone",
+  "python_320": "Clone"
+ },
+ {
+  "arquivo": "../data/images/clone/clone_1773322238317.jpg",
+  "esperado": "clone",
+  "python_640": "Clone",
+  "python_320": "Clone"
+ },
+ {
+  "arquivo": "../data/images/clone/clone_1773322239406.jpg",
+  "esperado": "clone",
+  "python_640": "Clone",
+  "python_320": "Clone"
+ },
+ {
+  "arquivo": "../data/images/clone/clone_1773322242662.jpg",
+  "esperado": "clone",
+  "python_640": "Clone",
+  "python_320": "Clone"
+ },
+ {
+  "arquivo": "../data/images/clone/clone_1773322238099.jpg",
+  "esperado": "clone",
+  "python_640": "Clone",
+  "python_320": "Clone"
+ },
+ {
+  "arquivo": "../data/images/cobra/]cobra_1773321992012.jpg",
+  "esperado": "cobra",
+  "python_640": "cobra",
+  "python_320": "cobra"
+ },
+ {
+  "arquivo": "../data/images/cobra/]cobra_1773321993321.jpg",
+  "esperado": "cobra",
+  "python_640": "cobra",
+  "python_320": "cobra"
+ },
+ {
+  "arquivo": "../data/images/cobra/]cobra_1773321989489.jpg",
+  "esperado": "cobra",
+  "python_640": "cobra",
+  "python_320": "cobra"
+ },
+ {
+  "arquivo": "../data/images/cobra/]cobra_1773321994089.jpg",
+  "esperado": "cobra",
+  "python_640": "cobra",
+  "python_320": "cobra"
+ },
+ {
+  "arquivo": "../data/images/cobra/]cobra_1773321991466.jpg",
+  "esperado": "cobra",
+  "python_640": "cobra",
+  "python_320": "cobra"
+ },
+ {
+  "arquivo": "../data/images/coelho/coelho_1773322288093.jpg",
+  "esperado": "coelho",
+  "python_640": "Coelho",
+  "python_320": "Coelho"
+ },
+ {
+  "arquivo": "../data/images/coelho/coelho_1773322288748.jpg",
+  "esperado": "coelho",
+  "python_640": "Coelho",
+  "python_320": "Coelho"
+ },
+ {
+  "arquivo": "../data/images/coelho/coelho_1773322287317.jpg",
+  "esperado": "coelho",
+  "python_640": "Coelho",
+  "python_320": "Coelho"
+ },
+ {
+  "arquivo": "../data/images/coelho/coelho_1773322289409.jpg",
+  "esperado": "coelho",
+  "python_640": "Coelho",
+  "python_320": "Coelho"
+ },
+ {
+  "arquivo": "../data/images/coelho/coelho_1773322284113.jpg",
+  "esperado": "coelho",
+  "python_640": "Coelho",
+  "python_320": "Coelho"
+ },
+ {
+  "arquivo": "../data/images/dragão/dragão_1773322017720.jpg",
+  "esperado": "dragão",
+  "python_640": "Dragao",
+  "python_320": "Dragao"
+ },
+ {
+  "arquivo": "../data/images/dragão/dragão_1773322016296.jpg",
+  "esperado": "dragão",
+  "python_640": "Dragao",
+  "python_320": "Dragao"
+ },
+ {
+  "arquivo": "../data/images/dragão/dragão_1773322020678.jpg",
+  "esperado": "dragão",
+  "python_640": "Dragao",
+  "python_320": "Dragao"
+ },
+ {
+  "arquivo": "../data/images/dragão/dragão_1773322016076.jpg",
+  "esperado": "dragão",
+  "python_640": "Dragao",
+  "python_320": "Dragao"
+ },
+ {
+  "arquivo": "../data/images/dragão/dragão_1773322021885.jpg",
+  "esperado": "dragão",
+  "python_640": "Dragao",
+  "python_320": "Dragao"
+ },
+ {
+  "arquivo": "../data/images/javali/javali_1773322160663.jpg",
+  "esperado": "javali",
+  "python_640": "Javali",
+  "python_320": "Javali"
+ },
+ {
+  "arquivo": "../data/images/javali/javali_1773322159455.jpg",
+  "esperado": "javali",
+  "python_640": "Javali",
+  "python_320": "Javali"
+ },
+ {
+  "arquivo": "../data/images/javali/javali_1773322157061.jpg",
+  "esperado": "javali",
+  "python_640": "Javali",
+  "python_320": "Javali"
+ },
+ {
+  "arquivo": "../data/images/javali/javali_1773322158039.jpg",
+  "esperado": "javali",
+  "python_640": "Javali",
+  "python_320": "Javali"
+ },
+ {
+  "arquivo": "../data/images/javali/javali_1773322158584.jpg",
+  "esperado": "javali",
+  "python_640": "Javali",
+  "python_320": "Javali"
+ },
+ {
+  "arquivo": "../data/images/macaco/coelho_1773322037230.jpg",
+  "esperado": "macaco",
+  "python_640": "Macaco",
+  "python_320": "Macaco"
+ },
+ {
+  "arquivo": "../data/images/macaco/coelho_1773322038980.jpg",
+  "esperado": "macaco",
+  "python_640": "Macaco",
+  "python_320": "Macaco"
+ },
+ {
+  "arquivo": "../data/images/macaco/coelho_1773322039526.jpg",
+  "esperado": "macaco",
+  "python_640": "Macaco",
+  "python_320": "Macaco"
+ },
+ {
+  "arquivo": "../data/images/macaco/coelho_1773322038759.jpg",
+  "esperado": "macaco",
+  "python_640": "Macaco",
+  "python_320": "Macaco"
+ },
+ {
+  "arquivo": "../data/images/macaco/coelho_1773322040848.jpg",
+  "esperado": "macaco",
+  "python_640": "Macaco",
+  "python_320": "Macaco"
+ },
+ {
+  "arquivo": "../data/images/passaro/passaro_1773322079835.jpg",
+  "esperado": "passaro",
+  "python_640": "Passaro",
+  "python_320": "Passaro"
+ },
+ {
+  "arquivo": "../data/images/passaro/passaro_1773322081806.jpg",
+  "esperado": "passaro",
+  "python_640": "Passaro",
+  "python_320": "Passaro"
+ },
+ {
+  "arquivo": "../data/images/passaro/passaro_1773322076879.jpg",
+  "esperado": "passaro",
+  "python_640": "Passaro",
+  "python_320": "Passaro"
+ },
+ {
+  "arquivo": "../data/images/passaro/passaro_1773322079284.jpg",
+  "esperado": "passaro",
+  "python_640": "Passaro",
+  "python_320": "Passaro"
+ },
+ {
+  "arquivo": "../data/images/passaro/passaro_1773322078731.jpg",
+  "esperado": "passaro",
+  "python_640": "Passaro",
+  "python_320": "Passaro"
+ },
+ {
+  "arquivo": "../data/images/tigre/tigre_1773321958103.jpg",
+  "esperado": "tigre",
+  "python_640": "Tigre",
+  "python_320": "Tigre"
+ },
+ {
+  "arquivo": "../data/images/tigre/tigre_1773321961055.jpg",
+  "esperado": "tigre",
+  "python_640": "Tigre",
+  "python_320": "Tigre"
+ },
+ {
+  "arquivo": "../data/images/tigre/tigre_1773321958648.jpg",
+  "esperado": "tigre",
+  "python_640": "Tigre",
+  "python_320": "Tigre"
+ },
+ {
+  "arquivo": "../data/images/tigre/tigre_1773321956787.jpg",
+  "esperado": "tigre",
+  "python_640": "Tigre",
+  "python_320": "Tigre"
+ },
+ {
+  "arquivo": "../data/images/tigre/tigre_1773321955360.jpg",
+  "esperado": "tigre",
+  "python_640": "Tigre",
+  "python_320": "Tigre"
+ }
+]

@@ -66,7 +66,8 @@ st.markdown("---")
 st.markdown(f"### Alvo: **{jutsu_escolhido}**")
 
 # --- GRID FIXO DE SELOS ---
-colunas_icones = st.columns(6) 
+# Jutsus longos (ex: Suiryuudan com 8 selos) ganham mais colunas
+colunas_icones = st.columns(max(6, len(sequencia_alvo)))
 
 for i, selo in enumerate(sequencia_alvo):
     with colunas_icones[i]: 

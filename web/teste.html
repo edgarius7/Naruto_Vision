@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Naruto Vision - Teste no navegador</title>
+  <style>
+    :root { color-scheme: dark; --fundo: #0d1117; --painel: #161b22; --texto: #c9d1d9; --destaque: #ff4b4b; --ok: #3fb950; --borda: #30363d; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.5 system-ui, sans-serif; }
+    main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+    h1 { color: var(--destaque); margin: 0 0 4px; font-size: 1.6rem; }
+    .sub { color: #8b949e; margin: 0 0 20px; }
+    .controles { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--painel); border: 1px solid var(--borda); border-radius: 10px; padding: 12px; margin-bottom: 16px; }
+    label { display: flex; gap: 6px; align-items: center; }
+    select, button { background: #21262d; color: var(--texto); border: 1px solid var(--borda); border-radius: 6px; padding: 6px 12px; font: inherit; cursor: pointer; }
+    button.primario { background: var(--destaque); border-color: var(--destaque); color: #fff; font-weight: 600; }
+    button:disabled { opacity: .5; cursor: default; }
+    .grade { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; }
+    @media (max-width: 800px) { .grade { grid-template-columns: 1fr; } }
+    canvas { width: 100%; background: #000; border-radius: 10px; display: block; }
+    .painel { background: var(--painel); border: 1px solid var(--borda); border-radius: 10px; padding: 14px; }
+    .metrica { display: flex; justify-content: space-between; border-bottom: 1px solid var(--borda); padding: 6px 0; }
+    .metrica b { font-variant-numeric: tabular-nums; }
+    .selo { font-size: 2rem; font-weight: 700; color: var(--ok); text-align: center; padding: 12px 0; }
+    #log { white-space: pre-wrap; font: 12px/1.4 ui-monospace, monospace; color: #8b949e; max-height: 260px; overflow: auto; margin-top: 12px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>🔥 Naruto Vision: teste no navegador</h1>
+  <p class="sub">O mesmo <code>best.pt</code>, exportado para ONNX e rodando aqui no navegador. O vídeo não sai do seu computador.</p>
+
+  <div class="controles">
+    <label>Backend
+      <select id="backend">
+        <option value="webgpu">WebGPU</option>
+        <option value="wasm">WASM (CPU)</option>
+      </select>
+    </label>
+    <label>Resolução do modelo
+      <select id="tamanho">
+        
+        <option value="320">320</option>
+      </select>
+    </label>
+    <button id="carregar">Carregar modelo</button>
+    <button id="camera" class="primario" disabled>Ligar câmera</button>
+    <button id="bench" disabled>Testar com imagens do dataset</button>
+  </div>
+
+  <div class="grade">
+    <canvas id="tela" width="640" height="480"></canvas>
+    <div class="painel">
+      <div class="selo" id="selo">—</div>
+      <div class="metrica"><span>Backend ativo</span><b id="m-backend">—</b></div>
+      <div class="metrica"><span>Inferência (média)</span><b id="m-inferencia">—</b></div>
+      <div class="metrica"><span>Quadros por segundo</span><b id="m-fps">—</b></div>
+      <div class="metrica"><span>Confiança</span><b id="m-conf">—</b></div>
+      <div id="log"></div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.webgpu.min.js"></script>
+<script type="module" src="teste.js"></script>
+</body>
+</html>
