@@ -15,6 +15,9 @@ export const CONFIG_PADRAO = {
   msLimite: 4000,     // tempo máximo entre selos no Treino
   msCombo: 2500,      // tempo máximo entre selos no Combate
   som: true,
+  voz: true,           // narrar o nome do jutsu em japonês
+  fundo: 'auto',       // ver fundos.js
+  escurecer: 0.78,     // quanto escurecer o plano de fundo para o texto continuar legível
   efeitos: 'completo', // 'completo' | 'leve'
   mostrarCaixa: true,
   teclado: false,      // simular selos pelo teclado (acessibilidade e testes)

@@ -1,15 +1,249 @@
 [
-  {"id": "kage_bunshin", "nome": "Kage Bunshin no Jutsu", "traducao": "Clones das Sombras", "selos": ["clone"], "elemento": "clone", "origem": "canone", "nota": "Usa o selo em cruz, que não é um dos 12 selos do zodíaco."},
-  {"id": "henge", "nome": "Henge no Jutsu", "traducao": "Transformação", "selos": ["cachorro", "javali", "carneiro"], "elemento": "transformacao", "origem": "fas"},
-  {"id": "chidori", "nome": "Chidori", "traducao": "Mil Pássaros", "selos": ["boi", "coelho", "macaco"], "elemento": "raio", "origem": "fas"},
-  {"id": "suiton_barreira", "nome": "Suiton: Barreira de Água", "traducao": "Parede d'água", "selos": ["tigre", "cobra", "tigre"], "elemento": "agua", "origem": "adaptado"},
-  {"id": "harem", "nome": "Harem no Jutsu", "traducao": "Jutsu Sexy em grupo", "selos": ["carneiro", "cobra", "tigre", "carneiro"], "elemento": "transformacao", "origem": "fas"},
-  {"id": "edo_tensei", "nome": "Edo Tensei", "traducao": "Reencarnação do Mundo Impuro", "selos": ["tigre", "cobra", "cachorro", "dragao"], "elemento": "invocacao", "origem": "fas", "nota": "Sequência de ativação com fonte fraca; a de liberação começa com o Rato."},
-  {"id": "doryuuheki", "nome": "Doton: Doryuuheki", "traducao": "Muralha de Terra", "selos": ["tigre", "coelho", "javali", "cachorro"], "elemento": "terra", "origem": "fas"},
-  {"id": "ryuuka", "nome": "Katon: Ryuuka no Jutsu", "traducao": "Fogo do Dragão", "selos": ["cobra", "dragao", "coelho", "tigre"], "elemento": "fogo", "origem": "fas"},
-  {"id": "daitoppa", "nome": "Fuuton: Daitoppa", "traducao": "Grande Rajada", "selos": ["cavalo", "passaro", "boi", "cachorro"], "elemento": "vento", "origem": "adaptado"},
-  {"id": "kawarimi", "nome": "Kawarimi no Jutsu", "traducao": "Substituição", "selos": ["carneiro", "javali", "boi", "cachorro", "cobra"], "elemento": "fumaca", "origem": "fas"},
-  {"id": "kuchiyose", "nome": "Kuchiyose no Jutsu", "traducao": "Invocação", "selos": ["javali", "cachorro", "passaro", "macaco", "carneiro"], "elemento": "invocacao", "origem": "canone"},
-  {"id": "goukakyuu", "nome": "Katon: Goukakyuu no Jutsu", "traducao": "Grande Bola de Fogo", "selos": ["cobra", "carneiro", "macaco", "javali", "cavalo", "tigre"], "elemento": "fogo", "origem": "canone"},
-  {"id": "suiryuudan", "nome": "Suiton: Suiryuudan (versão curta)", "traducao": "Projétil Dragão d'Água", "selos": ["boi", "macaco", "coelho", "javali", "passaro", "boi", "cavalo", "passaro"], "elemento": "agua", "origem": "adaptado", "nota": "Trecho inicial da sequência de 44 selos que circula entre fãs, sem o selo do Rato."}
+  {
+    "id": "kage_bunshin",
+    "nome": "Kage Bunshin no Jutsu",
+    "traducao": "Clones das Sombras",
+    "selos": [
+      "clone"
+    ],
+    "elemento": "clone",
+    "origem": "canone",
+    "nota": "Usa o selo em cruz, que não é um dos 12 selos do zodíaco.",
+    "kanji": "影分身の術",
+    "fala": "かげぶんしんのじゅつ",
+    "rank": "B",
+    "usuarios": "Naruto Uzumaki",
+    "descricao": "Cria cópias sólidas do usuário dividindo o chakra entre elas. Tudo o que um clone aprende volta para o original quando ele desaparece, o que o Naruto usa para treinar mais rápido.",
+    "audio": "jutsu"
+  },
+  {
+    "id": "henge",
+    "nome": "Henge no Jutsu",
+    "traducao": "Transformação",
+    "selos": [
+      "cachorro",
+      "javali",
+      "carneiro"
+    ],
+    "elemento": "transformacao",
+    "origem": "fas",
+    "kanji": "変化の術",
+    "fala": "へんげのじゅつ",
+    "rank": "E",
+    "usuarios": "Ensinado na Academia",
+    "descricao": "Muda a aparência do usuário para a de outra pessoa ou objeto. É uma das técnicas básicas que todo aluno precisa dominar para se formar."
+  },
+  {
+    "id": "chidori",
+    "nome": "Chidori",
+    "traducao": "Mil Pássaros",
+    "selos": [
+      "boi",
+      "coelho",
+      "macaco"
+    ],
+    "elemento": "raio",
+    "origem": "fas",
+    "kanji": "千鳥",
+    "fala": "ちどり",
+    "rank": "A",
+    "usuarios": "Kakashi Hatake (criador), Sasuke Uchiha",
+    "descricao": "Concentra chakra de raio na mão até ele soar como mil pássaros cantando. O golpe é uma estocada em alta velocidade que perfura quase qualquer defesa.",
+    "audio": "chidori"
+  },
+  {
+    "id": "suiton_barreira",
+    "nome": "Suiton: Barreira de Água",
+    "traducao": "Parede d'água",
+    "selos": [
+      "tigre",
+      "cobra",
+      "tigre"
+    ],
+    "elemento": "agua",
+    "origem": "adaptado",
+    "kanji": "水遁・水陣壁",
+    "fala": "すいとん、すいじんへき",
+    "rank": "B",
+    "usuarios": "Kakashi Hatake, Kisame Hoshigaki",
+    "descricao": "Cospe ou ergue uma grande parede de água em volta do usuário para bloquear ataques, principalmente os de fogo.",
+    "audio": "jutsu"
+  },
+  {
+    "id": "harem",
+    "nome": "Harem no Jutsu",
+    "traducao": "Jutsu Sexy em grupo",
+    "selos": [
+      "carneiro",
+      "cobra",
+      "tigre",
+      "carneiro"
+    ],
+    "elemento": "transformacao",
+    "origem": "fas",
+    "kanji": "ハーレムの術",
+    "fala": "ハーレムのじゅつ",
+    "rank": "E",
+    "usuarios": "Naruto Uzumaki",
+    "descricao": "Variação cômica do Jutsu Sexy combinada com clones. Criada pelo Naruto para distrair (e derrubar) adversários desprevenidos.",
+    "audio": "jutsu"
+  },
+  {
+    "id": "edo_tensei",
+    "nome": "Edo Tensei",
+    "traducao": "Reencarnação do Mundo Impuro",
+    "selos": [
+      "tigre",
+      "cobra",
+      "cachorro",
+      "dragao"
+    ],
+    "elemento": "invocacao",
+    "origem": "fas",
+    "nota": "Sequência de ativação com fonte fraca; a de liberação começa com o Rato.",
+    "kanji": "口寄せ・穢土転生",
+    "fala": "くちよせ、えどてんせい",
+    "rank": "Proibido",
+    "usuarios": "Tobirama Senju (criador), Orochimaru, Kabuto Yakushi",
+    "descricao": "Técnica proibida que traz mortos de volta ao mundo dos vivos em corpos de pó, presos à vontade de quem os invocou. Exige um sacrifício vivo.",
+    "audio": "jutsu"
+  },
+  {
+    "id": "doryuuheki",
+    "nome": "Doton: Doryuuheki",
+    "traducao": "Muralha de Terra",
+    "selos": [
+      "tigre",
+      "coelho",
+      "javali",
+      "cachorro"
+    ],
+    "elemento": "terra",
+    "origem": "fas",
+    "kanji": "土遁・土流壁",
+    "fala": "どとん、どりゅうへき",
+    "rank": "B",
+    "usuarios": "Kakashi Hatake",
+    "descricao": "Ergue do chão uma muralha de terra espessa, larga o bastante para proteger um grupo inteiro."
+  },
+  {
+    "id": "ryuuka",
+    "nome": "Katon: Ryuuka no Jutsu",
+    "traducao": "Fogo do Dragão",
+    "selos": [
+      "cobra",
+      "dragao",
+      "coelho",
+      "tigre"
+    ],
+    "elemento": "fogo",
+    "origem": "fas",
+    "kanji": "火遁・龍火の術",
+    "fala": "かとん、りゅうかのじゅつ",
+    "rank": "C",
+    "usuarios": "Sasuke Uchiha",
+    "descricao": "Lança fogo ao longo de um fio ou linha de chakra, que corre até o alvo como um dragão em chamas."
+  },
+  {
+    "id": "daitoppa",
+    "nome": "Fuuton: Daitoppa",
+    "traducao": "Grande Rajada",
+    "selos": [
+      "cavalo",
+      "passaro",
+      "boi",
+      "cachorro"
+    ],
+    "elemento": "vento",
+    "origem": "adaptado",
+    "kanji": "風遁・大突破",
+    "fala": "ふうとん、だいとっぱ",
+    "rank": "C",
+    "usuarios": "Orochimaru",
+    "descricao": "Sopra uma rajada de vento violenta, capaz de arrancar árvores e derrubar quem estiver no caminho."
+  },
+  {
+    "id": "kawarimi",
+    "nome": "Kawarimi no Jutsu",
+    "traducao": "Substituição",
+    "selos": [
+      "carneiro",
+      "javali",
+      "boi",
+      "cachorro",
+      "cobra"
+    ],
+    "elemento": "fumaca",
+    "origem": "fas",
+    "kanji": "変わり身の術",
+    "fala": "かわりみのじゅつ",
+    "rank": "E",
+    "usuarios": "Ensinado na Academia",
+    "descricao": "No instante do golpe, o ninja troca de lugar com um objeto próximo, geralmente um tronco, e deixa o inimigo acertando o vazio.",
+    "audio": "jutsu"
+  },
+  {
+    "id": "kuchiyose",
+    "nome": "Kuchiyose no Jutsu",
+    "traducao": "Invocação",
+    "selos": [
+      "javali",
+      "cachorro",
+      "passaro",
+      "macaco",
+      "carneiro"
+    ],
+    "elemento": "invocacao",
+    "origem": "canone",
+    "kanji": "口寄せの術",
+    "fala": "くちよせのじゅつ",
+    "rank": "C",
+    "usuarios": "Jiraiya, Naruto, Tsunade, Orochimaru",
+    "descricao": "Invoca um animal com quem o usuário assinou um contrato de sangue, como sapos, lesmas ou cobras. A mão vai ao chão no final da sequência.",
+    "audio": "jutsu"
+  },
+  {
+    "id": "goukakyuu",
+    "nome": "Katon: Goukakyuu no Jutsu",
+    "traducao": "Grande Bola de Fogo",
+    "selos": [
+      "cobra",
+      "carneiro",
+      "macaco",
+      "javali",
+      "cavalo",
+      "tigre"
+    ],
+    "elemento": "fogo",
+    "origem": "canone",
+    "kanji": "火遁・豪火球の術",
+    "fala": "かとん、ごうかきゅうのじゅつ",
+    "rank": "C",
+    "usuarios": "Sasuke Uchiha, clã Uchiha",
+    "descricao": "Solta pela boca uma enorme bola de fogo. No clã Uchiha, dominar essa técnica é o rito de passagem para ser reconhecido como adulto.",
+    "audio": "fogo"
+  },
+  {
+    "id": "suiryuudan",
+    "nome": "Suiton: Suiryuudan (versão curta)",
+    "traducao": "Projétil Dragão d'Água",
+    "selos": [
+      "boi",
+      "macaco",
+      "coelho",
+      "javali",
+      "passaro",
+      "boi",
+      "cavalo",
+      "passaro"
+    ],
+    "elemento": "agua",
+    "origem": "adaptado",
+    "nota": "Trecho inicial da sequência de 44 selos que circula entre fãs, sem o selo do Rato.",
+    "kanji": "水遁・水龍弾の術",
+    "fala": "すいとん、すいりゅうだんのじゅつ",
+    "rank": "B",
+    "usuarios": "Zabuza Momochi, Kakashi Hatake",
+    "descricao": "Molda a água num dragão que avança e esmaga o alvo. É famosa pelos 44 selos que Zabuza e Kakashi fazem ao mesmo tempo na luta da ponte."
+  }
 ]

@@ -2,11 +2,13 @@
 import { Detector, MotorVisao, abrirCamera } from './visao.js';
 import { FiltroSelo } from './jogo.js';
 import { Efeitos } from './efeitos.js';
-import { som, destravarSom, configurarSom } from './som.js';
+import { som, destravarSom, configurarSom, falarJutsu } from './som.js';
 import { estado, registrar as registrarProgresso, rankAtual } from './progresso.js';
 import { SELOS, nomeSelo } from './selos.js';
 import { criarModos } from './modos.js';
 import { renderizarPerfil } from './perfil.js';
+import { renderizarPergaminho } from './pergaminho.js';
+import { aplicarFundo, abrirSeletorFundo } from './fundos.js';
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -44,7 +46,8 @@ const prefereMenosMovimento = window.matchMedia('(prefers-reduced-motion: reduce
 function aplicarConfig() {
   const c = estado.config;
   filtro.msSegurar = c.msSegurar;
-  configurarSom(c.som);
+  configurarSom(c.som, c.voz);
+  aplicarFundo(rotaAtual());
   efeitos.configurar({ leve: c.efeitos === 'leve' || prefereMenosMovimento });
   $('#teclado-legenda').hidden = !tecladoAtivo();
   for (const modo of Object.values(modos)) modo.aoMudarConfig?.(c);
@@ -281,8 +284,13 @@ function sairDoJogo() {
 
 const TELAS_JOGO = ['dojo', 'treino', 'combate', 'desafio'];
 
+const rotaAtual = () => (location.hash.replace(/^#\/?/, '').split('?')[0]) || 'inicio';
+const parametro = (nome) => new URLSearchParams(location.hash.split('?')[1]).get(nome);
+
 function rotear() {
-  const rota = (location.hash.replace(/^#\/?/, '').split('?')[0]) || 'inicio';
+  const rota = rotaAtual();
+  // vem do Pergaminho: guarda o jutsu escolhido mesmo se ainda for preciso passar pela câmera
+  if (rota === 'treino' && parametro('jutsu')) modos.treino.escolher(parametro('jutsu'));
   if (TELAS_JOGO.includes(rota) && !prontoParaJogar()) {
     location.replace(`#/camera?depois=${rota}`);
     return;
@@ -294,11 +302,13 @@ function rotear() {
     else a.removeAttribute('aria-current');
   });
 
+  aplicarFundo(rota);
   if (TELAS_JOGO.includes(rota)) entrarNoJogo(rota);
   else sairDoJogo();
 
   if (rota === 'camera') carregarModelo().catch(() => {});
   if (rota === 'perfil') renderizarPerfil($('#perfil'), { jutsus, aoMudarConfig: aplicarConfig, aoZerar: atualizarTopo });
+  if (rota === 'pergaminho') renderizarPergaminho($('#pergaminho'), { jutsus, corDoElemento: app.corDoElemento });
   window.scrollTo(0, 0);
 }
 
@@ -319,6 +329,7 @@ $('#teclado-legenda').innerHTML = Object.entries(TECLAS)
   .map(([tecla, selo]) => `<span><kbd>${tecla.toUpperCase()}</kbd> ${SELOS[selo].nome}</span>`).join('');
 $('#btn-ativar').addEventListener('click', ativarCamera);
 $('#btn-teclado').addEventListener('click', jogarComTeclado);
+$('#btn-fundo').addEventListener('click', () => abrirSeletorFundo({ aoMudar: aplicarConfig }));
 document.addEventListener('click', destravarSom, { once: true });
 
 const app = {
@@ -336,8 +347,9 @@ const app = {
   soltarJutsu(jutsu, sub = '') {
     const { w, h } = app.tamanho();
     efeitos.jutsu(jutsu.elemento, origemDoEfeito(), w, h);
-    som.jutsu(jutsu.elemento);
-    faixa(jutsu.nome, sub, app.corDoElemento(jutsu.elemento));
+    som.jutsu(jutsu);
+    falarJutsu(jutsu);
+    faixa(`<span class="faixa-kanji">${jutsu.kanji}</span>${jutsu.nome}`, sub, app.corDoElemento(jutsu.elemento));
   },
 };
 

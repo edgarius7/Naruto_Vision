@@ -11,6 +11,7 @@ const AJUSTES = [
 
 const OPCOES = [
   { chave: 'som', rotulo: 'Efeitos sonoros' },
+  { chave: 'voz', rotulo: 'Voz falando o nome do jutsu' },
   { chave: 'efeitosLeves', rotulo: 'Efeitos visuais leves (menos partículas, sem tremer a tela)' },
   { chave: 'mostrarCaixa', rotulo: 'Mostrar a caixa de detecção em volta das mãos' },
   { chave: 'teclado', rotulo: 'Simular selos pelo teclado (sem câmera)' },
@@ -57,6 +58,7 @@ export function renderizarPerfil(raiz, { jutsus, aoMudarConfig, aoZerar }) {
       ${OPCOES.map((o) => `
         <label class="ajuste-check"><input type="checkbox" id="op-${o.chave}" ${valorOpcao(o.chave) ? 'checked' : ''}> ${o.rotulo}</label>`).join('')}
       <p style="color:var(--texto-2);font-size:14px">No modo teclado, segure uma tecla para fazer o selo: X Clone, T Tigre, O Cobra, N Carneiro, B Boi, H Cachorro, J Javali, M Macaco, C Coelho, V Cavalo, P Pássaro, D Dragão.</p>
+      <p style="color:var(--texto-2);font-size:14px">Para trocar o plano de fundo, use o botão 🖼 no topo da página.</p>
       <button class="botao botao-pequeno" id="zerar">Apagar meu progresso</button>
     </div>`;
 

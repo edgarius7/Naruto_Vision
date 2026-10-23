@@ -1,8 +1,57 @@
-// Efeitos sonoros sintetizados na hora com Web Audio: nada de áudio do anime, nada para baixar.
+// Sons do jogo: efeitos sintetizados com Web Audio, os áudios do projeto original e a voz que fala o nome do jutsu.
 let ctx = null;
 let ligado = true;
+let vozLigada = true;
 
-export function configurarSom(ativo) { ligado = ativo; }
+export function configurarSom(ativo, voz = true) { ligado = ativo; vozLigada = voz; }
+
+// Áudios do projeto original (assets/audios). Jutsu com áudio próprio não usa o efeito sintetizado.
+const AUDIOS = { fogo: 'audio/fogo.mp3', chidori: 'audio/chidori.mp3', jutsu: 'audio/jutsu.mp3' };
+const cacheAudio = {};
+function tocarArquivo(nome, volume = 0.9) {
+  const url = AUDIOS[nome];
+  if (!url) return;
+  cacheAudio[nome] ??= new Audio(url);
+  const a = cacheAudio[nome].cloneNode();
+  a.volume = volume;
+  a.play().catch(() => {});
+}
+
+// Voz: usa uma voz japonesa do sistema quando existe; sem ela, lê o nome romanizado
+let vozJaponesa = null;
+function escolherVoz() {
+  const vozes = window.speechSynthesis?.getVoices() ?? [];
+  vozJaponesa = vozes.find((v) => v.lang?.toLowerCase().startsWith('ja')) ?? null;
+}
+if (window.speechSynthesis) {
+  escolherVoz();
+  window.speechSynthesis.addEventListener?.('voiceschanged', escolherVoz);
+}
+
+export const temVozJaponesa = () => Boolean(vozJaponesa);
+
+/** Fala o nome do jutsu, como o ninja grita no anime */
+export function falarJutsu(jutsu, { forcar = false } = {}) {
+  if (!forcar && !ligado) return;
+  // Bola de Fogo e Chidori já têm o nome gritado no próprio áudio: toca só ele
+  if (jutsu.audio && jutsu.audio !== 'jutsu') { tocarArquivo(jutsu.audio); return; }
+  // O "jutsu!" genérico entra depois da voz, para as duas não se atropelarem
+  const depois = jutsu.audio ? () => tocarArquivo(jutsu.audio) : () => {};
+  if (!window.speechSynthesis || (!forcar && !vozLigada)) { depois(); return; }
+
+  window.speechSynthesis.cancel();
+  const fala = new SpeechSynthesisUtterance(vozJaponesa ? `${jutsu.fala}！` : `${jutsu.nome}!`);
+  if (vozJaponesa) { fala.voice = vozJaponesa; fala.lang = vozJaponesa.lang; }
+  fala.rate = 1.05;
+  fala.pitch = 1.1;
+  fala.volume = 1;
+  let tocou = false;
+  const umaVez = () => { if (!tocou) { tocou = true; depois(); } };
+  fala.onend = umaVez;
+  fala.onerror = umaVez;
+  setTimeout(umaVez, 3000); // sem voz no sistema o onend pode nunca chegar
+  window.speechSynthesis.speak(fala);
+}
 
 // O navegador só libera áudio depois de um clique; chamamos isto no primeiro botão
 export function destravarSom() {
@@ -62,8 +111,8 @@ export const som = {
     if (!pronto()) return;
     tom(440, { duracao: 0.35, tipo: 'sawtooth', volume: 0.05, ate: 110 });
   },
-  jutsu(elemento) {
-    if (!pronto()) return;
+  jutsu({ elemento, audio }) {
+    if (!pronto() || audio) return; // com áudio próprio, quem toca é o falarJutsu
     const perfis = {
       fogo: () => ruido({ duracao: 1.1, volume: 0.35, de: 900, ate: 120 }),
       raio: () => { for (let i = 0; i < 10; i++) tom(1200 + Math.random() * 2400, { inicio: i * 0.05, duracao: 0.04, tipo: 'square', volume: 0.04 }); ruido({ duracao: 0.6, filtro: 'highpass', de: 3000, ate: 6000, volume: 0.12 }); },

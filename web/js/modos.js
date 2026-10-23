@@ -111,6 +111,13 @@ export function criarModos(app) {
       this.novaSessao();
     },
 
+    escolher(id) {
+      const jutsu = app.jutsus.find((x) => x.id === id);
+      if (!jutsu) return;
+      this.jutsu = jutsu;
+      if (this.sessao) this.novaSessao();
+    },
+
     novaSessao() {
       this.sessao = new Treino(this.jutsu, { msLimite: estado.config.msLimite });
       this.bateuRecorde = false;
@@ -138,12 +145,13 @@ export function criarModos(app) {
 
       painel.innerHTML = `
         <div>
+          <span class="kanji">${j.kanji}</span>
           <h1>${j.nome}${ETIQUETAS[j.origem] ?? ''}</h1>
           <p>${j.traducao} · ${j.selos.length} selo${j.selos.length > 1 ? 's' : ''}${j.nota ? ` · <i>${j.nota}</i>` : ''}</p>
         </div>
         ${receitaHTML(j, s.indice, s.concluido)}
         ${resultado}
-        <h2>Pergaminho de jutsus</h2>
+        <h2>Escolha o jutsu</h2>
         <div class="lista-jutsus">${app.jutsus.map((x) => `
           <button type="button" class="jutsu-item" data-jutsu="${x.id}" aria-pressed="${x.id === j.id}">
             <b>${x.nome}</b>
